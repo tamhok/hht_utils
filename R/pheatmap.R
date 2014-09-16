@@ -1,5 +1,11 @@
 #Customized version of pheatmap plugin for making heatmaps for nanoString and various other things
 
+#' Easy heatmap drawing
+#'
+#' Draw a heatmap with optional files and such
+#' @param data data to map
+#' @param filename if not NA, writes it to a file otherwise to current device
+#' @param sidelabel big text on map if desired (title)
 draw_map=function(data, filename=NA, sidelabel=NA) {
 	if(!is.na(filename)) {
 		dim=get_size(t(data), filename=filename, showcolns=TRUE);
@@ -13,6 +19,11 @@ draw_map=function(data, filename=NA, sidelabel=NA) {
 	}
 }
 
+#' Heatmap sizing
+#' 
+#' Sizes heatmap by drawing it. 
+#' @inheritParams draw_map 
+#' @param showcolns yes to size for column names or not
 get_size=function(data, sidelabel=NA, filename, showcolns) {
 	dim=pheatmap(data, col=greenred(64), cluster_rows=FALSE, 
 		cluster_cols=FALSE, family="Sans", fontsize=18, cellwidth=36,
@@ -21,7 +32,10 @@ get_size=function(data, sidelabel=NA, filename, showcolns) {
 	return(dim)
 }
 
-
+#' lo
+#'
+#' internal function for setting heatmap sizing
+#' For further documentation see pheatmap
 lo = function(rown, coln, nrow, ncol, cellheight = NA, cellwidth = NA, treeheight_col=0, treeheight_row=0, legend=NA, annotation=NA, annotation_colors= NA, annotation_legend=NA, main, preset_main_width=NA, fontsize, fontsize_row=fontsize, fontsize_col=fontsize, ...){
 	# Get height of colnames and length of rownames
 	if(!is.null(coln[1])){

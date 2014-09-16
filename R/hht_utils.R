@@ -1,6 +1,10 @@
 #utilities file for commonly used functions across different sets
 
-#Trim row and column names out of data
+#' Trim row and column names out of data
+#' 
+#' Removes row and column names and assigns them to row and column name
+#' @param data matrix to remove rows and columns from
+#' @return data with 1st row -> colname and 1st col -> rowname
 remove.headers.footers <- function(data) {
   data.n = data[-1,-1]
   rownames(data.n) = data[-1,1]
@@ -8,7 +12,14 @@ remove.headers.footers <- function(data) {
   return(data.n)
 }
 
+#' Data frame column converter
+#" 
 #' converts specific columns of a data frame according to fn.
+#' @param dframe data frame 
+#' @param cols columns (numerically) to convert, default is all
+#' @param s if not NA, sets col to s:ncol(dframe) 
+#' @param fn what function to apply (default as.numeric)
+#' @return converted df
 convert.df  <-  function(dframe, cols=1:ncol(dframe), s=NA, fn=as.numeric) {
   if(!is.na(s)) {
 	  cols = s:ncol(dframe)
@@ -18,8 +29,11 @@ convert.df  <-  function(dframe, cols=1:ncol(dframe), s=NA, fn=as.numeric) {
   return(dframe)
 }
 
-# Makes strings as factors false
-df.nf <- function(mat) data.frame(mat, stringsAsFactors=FALSE)
+#' data frame maker without factors
+#' 
+#' Makes data frame with strings as factors false
+#' @param whatever you would send to data.frame anyways 
+df.nf <- function(...) data.frame(..., stringsAsFactors=FALSE)
 
 
 
