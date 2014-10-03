@@ -1,3 +1,6 @@
+library(gplots)
+library(grid)
+
 #Customized version of pheatmap plugin for making heatmaps for nanoString and various other things
 
 #' Easy heatmap drawing
@@ -6,17 +9,11 @@
 #' @param data data to map
 #' @param filename if not NA, writes it to a file otherwise to current device
 #' @param sidelabel big text on map if desired (title)
-draw_map=function(data, filename=NA, sidelabel=NA) {
-	if(!is.na(filename)) {
-		dim=get_size(t(data), filename=filename, showcolns=TRUE);
-		tiff(filename, width=dim[1]+1, units="in", res=300, height=dim[2])
-	}
-	pheatmap(t(data.matrix(data)), col=greenred(64), cluster_rows=FALSE, cluster_cols=FALSE, legend_breaks=c(-4,-2,0,2,4), legend_labels=c(-4,-2,0,2,4),
+#' @param col_breaks color breaks if needed
+draw_map=function(data, filename=NA, sidelabel=NA, cbreaks=seq(-4,4,length.out=63), col_breaks = c(-15, cbreaks, 15), legend_breaks=c(-4,-2,0,2,4), legend_labels=legend_breaks) {
+	pheatmap(t(data.matrix(data)), col=gplots::greenred(64), cluster_rows=FALSE, cluster_cols=FALSE, legend_breaks = legend_breaks, legend_lables = legend_labels,
 		family="Sans", fontsize=18, cellwidth=36, cellheight=20, main=sidelabel,
-		breaks=col_breaks, rbreaks=cbreaks, scale="none", legend=TRUE)
-	if(!is.na(filename)) {
-		dev.off()
-	}
+		breaks=col_breaks, rbreaks=cbreaks, scale="none", legend=TRUE, filename = filename)
 }
 
 #' Heatmap sizing
@@ -25,7 +22,7 @@ draw_map=function(data, filename=NA, sidelabel=NA) {
 #' @inheritParams draw_map 
 #' @param showcolns yes to size for column names or not
 get_size=function(data, sidelabel=NA, filename, showcolns) {
-	dim=pheatmap(data, col=greenred(64), cluster_rows=FALSE, 
+	dim=pheatmap(data, col=gplots::greenred(64), cluster_rows=FALSE, 
 		cluster_cols=FALSE, family="Sans", fontsize=18, cellwidth=36,
 		cellheight=20, main=sidelabel, filename=filename, show_colnames=showcolns,
 		breaks=col_breaks, rbreaks=cbreaks, scale="none", legend=FALSE)
@@ -41,86 +38,86 @@ lo = function(rown, coln, nrow, ncol, cellheight = NA, cellwidth = NA, treeheigh
 	if(!is.null(coln[1])){
 		longest_coln = which.max(nchar(coln))
 		gp = list(fontsize = fontsize_col, ...)
-		coln_height = unit(1.1, "grobheight", textGrob(coln[longest_coln], rot = 90, gp = do.call(gpar, gp)))
+		coln_height = grid::unit(1.1, "grobheight", grid::textGrob(coln[longest_coln], rot = 90, gp = do.call(grid::gpar, gp)))
 	}
 	else{
-		coln_height = unit(5, "bigpts")
+		coln_height = grid::unit(5, "bigpts")
 	}
 	
 	if(!is.null(rown[1])){
 		longest_rown = which.max(nchar(rown))
 		gp = list(fontsize = fontsize_row, ...)
-		rown_width = unit(1.2, "grobwidth", textGrob(rown[longest_rown], gp = do.call(gpar, gp)))
+		rown_width = grid::unit(1.2, "grobwidth", grid::textGrob(rown[longest_rown], gp = do.call(grid::gpar, gp)))
 	}
 	else{
-		rown_width = unit(5, "bigpts")
+		rown_width = grid::unit(5, "bigpts")
 	}
 	
 	gp = list(fontsize = fontsize, ...)
 	# Legend position
 	if(!is.na(legend[1])){
 		longest_break = which.max(nchar(names(legend)))
-		longest_break = unit(1.1, "grobwidth", textGrob(as.character(names(legend))[longest_break], gp = do.call(gpar, gp)))
-		title_length = unit(1.1, "grobwidth", textGrob("Scale", gp = gpar(fontface = "bold", ...)))
-		legend_width = unit(12, "bigpts") + longest_break * 1.2
+		longest_break = grid::unit(1.1, "grobwidth", grid::textGrob(as.character(names(legend))[longest_break], gp = do.call(grid::gpar, gp)))
+		title_length = grid::unit(1.1, "grobwidth", grid::textGrob("Scale", gp = grid::gpar(fontface = "bold", ...)))
+		legend_width = grid::unit(12, "bigpts") + longest_break * 1.2
 		legend_width = max(title_length, legend_width)
 	}
 	else{
-		legend_width = unit(0, "bigpts")
+		legend_width = grid::unit(0, "bigpts")
 	}
 	
 	# Set main title height
 	if(is.na(main)){
-		main_height = unit(0, "npc")
-		main_width = unit(0, "bigpts")
+		main_height = grid::unit(0, "npc")
+		main_width = grid::unit(0, "bigpts")
 	}
 	else{
-		main_width = unit(1.2, "grobwidth", textGrob(main, gp = gpar(fontsize =fontsize, ...)))
-		main_height = unit(0, "bigpts")
+		main_width = grid::unit(1.2, "grobwidth", grid::textGrob(main, gp = grid::gpar(fontsize =fontsize, ...)))
+		main_height = grid::unit(0, "bigpts")
 	}
 	
 	if(!is.na(preset_main_width)) {
-		main_width=unit(preset_main_width, "inches")
+		main_width=grid::unit(preset_main_width, "inches")
 	}
 	
 	# Column annotations
 	if(!is.na(annotation[[1]][1])){
 		# Column annotation height 
-		annot_height = unit(ncol(annotation) * (8 + 2) + 2, "bigpts")
+		annot_height = grid::unit(ncol(annotation) * (8 + 2) + 2, "bigpts")
 		# Width of the correponding legend
 		longest_ann = which.max(nchar(as.matrix(annotation)))
-		annot_legend_width = unit(1.2, "grobwidth", textGrob(as.matrix(annotation)[longest_ann], gp = gpar(...))) + unit(12, "bigpts")
+		annot_legend_width = grid::unit(1.2, "grobwidth", grid::textGrob(as.matrix(annotation)[longest_ann], gp = grid::gpar(...))) + grid::unit(12, "bigpts")
 		if(!annotation_legend){
-			annot_legend_width = unit(0, "npc")
+			annot_legend_width = grid::unit(0, "npc")
 		}
 	}
 	else{
-		annot_height = unit(0, "bigpts")
-		annot_legend_width = unit(0, "bigpts")
+		annot_height = grid::unit(0, "bigpts")
+		annot_legend_width = grid::unit(0, "bigpts")
 	}
 	
 	# Tree height
-	treeheight_col = unit(treeheight_col, "bigpts") + unit(5, "bigpts")
-	treeheight_row = unit(treeheight_row, "bigpts") + unit(5, "bigpts") 
+	treeheight_col = grid::unit(treeheight_col, "bigpts") + grid::unit(5, "bigpts")
+	treeheight_row = grid::unit(treeheight_row, "bigpts") + grid::unit(5, "bigpts") 
 
 	# Set cell sizes
 	if(is.na(cellwidth)){
-		matwidth = unit(1, "npc") - rown_width - legend_width - treeheight_row - annot_legend_width
+		matwidth = grid::unit(1, "npc") - rown_width - legend_width - treeheight_row - annot_legend_width
 	}
 	else{
-		matwidth = unit(cellwidth * ncol, "bigpts")
+		matwidth = grid::unit(cellwidth * ncol, "bigpts")
 	}
 	
 	if(is.na(cellheight)){
-		matheight = unit(1, "npc") - main_height - coln_height - treeheight_col - annot_height
+		matheight = grid::unit(1, "npc") - main_height - coln_height - treeheight_col - annot_height
 	}
 	else{
-		matheight = unit(cellheight * nrow, "bigpts")
+		matheight = grid::unit(cellheight * nrow, "bigpts")
 	}	
-	widths = unit.c(main_width, matwidth, rown_width, legend_width, annot_legend_width)
-	heights = unit.c(main_height, treeheight_col, annot_height, coln_height, matheight)
+	widths = grid::unit.c(main_width, matwidth, rown_width, legend_width, annot_legend_width)
+	heights = grid::unit.c(main_height, treeheight_col, annot_height, coln_height, matheight)
 
-	return(list(widths, heights, gp, as.numeric(convertUnit(main_width, "inches"))))
+	return(list(widths, heights, gp, as.numeric(grid::convertUnit(main_width, "inches"))))
 }
 
 draw_dendrogram = function(hc, horizontal = T){
@@ -141,9 +138,9 @@ draw_dendrogram = function(hc, horizontal = T){
 	}
 	
 	draw_connection = function(x1, x2, y1, y2, y){
-		grid.lines(x = c(x1, x1), y = c(y1, y))
-		grid.lines(x = c(x2, x2), y = c(y2, y))
-		grid.lines(x = c(x1, x2), y = c(y, y))
+		grid::grid.lines(x = c(x1, x1), y = c(y1, y))
+		grid::grid.lines(x = c(x2, x2), y = c(y2, y))
+		grid::grid.lines(x = c(x1, x2), y = c(y, y))
 	}
 	
 	if(horizontal){
@@ -154,12 +151,12 @@ draw_dendrogram = function(hc, horizontal = T){
 	
 	else{
 		gr = rectGrob()
-		pushViewport(viewport(height = unit(1, "grobwidth", gr), width = unit(1, "grobheight", gr), angle = 90))
+		grid::pushViewport(grid::viewport(height = grid::unit(1, "grobwidth", gr), width = grid::unit(1, "grobheight", gr), angle = 90))
 		dist[, 1] = 1 - dist[, 1] 
 		for(i in 1:nrow(m)){
 			draw_connection(dist[m[i, 1], 1], dist[m[i, 2], 1], dist[m[i, 1], 2], dist[m[i, 2], 2], h[i])
 		}
-		upViewport()
+		grid::upViewport()
 	}
 }
 
@@ -169,9 +166,9 @@ draw_matrix = function(matrix, border_color, fmat, fontsize_number){
 	x = (1:m)/m - 1/2/m
 	y = 1 - ((1:n)/n - 1/2/n)
 	for(i in 1:m){
-		grid.rect(x = x[i], y = y[1:n], width = 1/m, height = 1/n, gp = gpar(fill = matrix[,i], col = border_color))
+		grid::grid.rect(x = x[i], y = y[1:n], width = 1/m, height = 1/n, gp = grid::gpar(fill = matrix[,i], col = border_color))
 		if(attr(fmat, "draw")){
-			grid.text(x = x[i], y = y[1:n], label = fmat[, i], gp = gpar(col = "grey30", fontsize = fontsize_number))
+			grid::grid.text(x = x[i], y = y[1:n], label = fmat[, i], gp = grid::gpar(col = "grey30", fontsize = fontsize_number))
 		}
 	}
 }
@@ -179,25 +176,25 @@ draw_matrix = function(matrix, border_color, fmat, fontsize_number){
 draw_colnames = function(coln, ...){
     m = length(coln)
     x = (1:m)/m - 1/2/m
-    grid.text(coln, x = x, y = unit(0.04, "npc"), vjust = .5, 
-        hjust = 0, rot = 90, gp = gpar(cex=1,...)) 
+    grid::grid.text(coln, x = x, y = grid::unit(0.04, "npc"), vjust = .5, 
+        hjust = 0, rot = 90, gp = grid::gpar(cex=1,...)) 
 }
 
 draw_rownames = function(rown, ...){
 	n = length(rown)
 	y = 1 - ((1:n)/n - 1/2/n)
-	grid.text(rown, x = unit(0.04, "npc"), y = y, vjust = 0.5, hjust = 0, gp = gpar(...))	
+	grid::grid.text(rown, x = grid::unit(0.04, "npc"), y = y, vjust = 0.5, hjust = 0, gp = grid::gpar(...))	
 }
 
 draw_legend = function(color, breaks, legend, ht=1,...){
-	height = min(unit(1, "npc"), unit(150, "bigpts"))
-	pushViewport(viewport(x = 0, y = unit(ht, "npc"), just = c(0, 1), height = height))
+	height = min(grid::unit(1, "npc"), grid::unit(150, "bigpts"))
+	grid::pushViewport(grid::viewport(x = 0, y = grid::unit(ht, "npc"), just = c(0, 1), height = height))
 	legend_pos = (legend - min(breaks)) / (max(breaks) - min(breaks))
 	breaks = (breaks - min(breaks)) / (max(breaks) - min(breaks))
 	h = breaks[-1] - breaks[-length(breaks)]
-	grid.rect(x = 0, y = breaks[-length(breaks)], width = unit(10, "bigpts"), height = h, hjust = 0, vjust = 0, gp = gpar(fill = color, col = "#FFFFFF00"))
-	grid.text(names(legend), x = unit(12, "bigpts"), y = legend_pos, hjust = 0, gp = gpar(...))
-	upViewport()
+	grid::grid.rect(x = 0, y = breaks[-length(breaks)], width = grid::unit(10, "bigpts"), height = h, hjust = 0, vjust = 0, gp = grid::gpar(fill = color, col = "#FFFFFF00"))
+	grid::grid.text(names(legend), x = grid::unit(12, "bigpts"), y = legend_pos, hjust = 0, gp = grid::gpar(...))
+	grid::upViewport()
 }
 
 convert_annotations = function(annotation, annotation_colors){
@@ -226,30 +223,30 @@ draw_annotations = function(converted_annotations, border_color){
 	x = (1:m)/m - 1/2/m
 	y = cumsum(rep(8, n)) - 4 + cumsum(rep(2, n))
 	for(i in 1:m){
-		grid.rect(x = x[i], unit(y[1:n], "bigpts"), width = 1/m, height = unit(8, "bigpts"), gp = gpar(fill = converted_annotations[i, ], col = border_color))
+		grid::grid.rect(x = x[i], grid::unit(y[1:n], "bigpts"), width = 1/m, height = grid::unit(8, "bigpts"), gp = grid::gpar(fill = converted_annotations[i, ], col = border_color))
 	}
 }
 
 draw_annotation_legend = function(annotation, annotation_colors, border_color, ...){
-	y = unit(1, "npc")
-	text_height = unit(1, "grobheight", textGrob("FGH", gp = gpar(...)))
+	y = grid::unit(1, "npc")
+	text_height = grid::unit(1, "grobheight", grid::textGrob("FGH", gp = grid::gpar(...)))
 	for(i in names(annotation_colors)){
-		grid.text(i, x = 0, y = y, vjust = 1, hjust = 0, gp = gpar(fontface = "bold", ...))
+		grid::grid.text(i, x = 0, y = y, vjust = 1, hjust = 0, gp = grid::gpar(fontface = "bold", ...))
 		y = y - 1.5 * text_height
 		if(is.character(annotation[, i]) | is.factor(annotation[, i])){
 			for(j in 1:length(annotation_colors[[i]])){
-				grid.rect(x = unit(0, "npc"), y = y, hjust = 0, vjust = 1, height = text_height, width = text_height, gp = gpar(col = border_color, fill = annotation_colors[[i]][j]))
-				grid.text(names(annotation_colors[[i]])[j], x = text_height * 1.3, y = y, hjust = 0, vjust = 1, gp = gpar(...))
+				grid::grid.rect(x = grid::unit(0, "npc"), y = y, hjust = 0, vjust = 1, height = text_height, width = text_height, gp = grid::gpar(col = border_color, fill = annotation_colors[[i]][j]))
+				grid::grid.text(names(annotation_colors[[i]])[j], x = text_height * 1.3, y = y, hjust = 0, vjust = 1, gp = grid::gpar(...))
 				y = y - 1.5 * text_height
 			}
 		}
 		else{
 			yy = y - 4 * text_height + seq(0, 1, 0.02) * 4 * text_height
 			h = 4 * text_height * 0.02
-			grid.rect(x = unit(0, "npc"), y = yy, hjust = 0, vjust = 1, height = h, width = text_height, gp = gpar(col = "#FFFFFF00", fill = colorRampPalette(annotation_colors[[i]])(50)))
-			txt = rev(range(grid.pretty(range(annotation[, i], na.rm = TRUE))))
+			grid::grid.rect(x = grid::unit(0, "npc"), y = yy, hjust = 0, vjust = 1, height = h, width = text_height, gp = grid::gpar(col = "#FFFFFF00", fill = colorRampPalette(annotation_colors[[i]])(50)))
+			txt = rev(range(grid::grid.pretty(range(annotation[, i], na.rm = TRUE))))
 			yy = y - c(0, 3) * text_height
-			grid.text(txt, x = text_height * 1.3, y = yy, hjust = 0, vjust = 1, gp = gpar(...))
+			grid::grid.text(txt, x = text_height * 1.3, y = yy, hjust = 0, vjust = 1, gp = grid::gpar(...))
 			y = y - 4.5 * text_height
 		}
 		y = y - 1.5 * text_height
@@ -257,11 +254,11 @@ draw_annotation_legend = function(annotation, annotation_colors, border_color, .
 }
 
 draw_main = function(text, ...){
-	grid.text(text, x=unit(0.96, "npc"), vjust=0.5,hjust=1, gp = gpar(fontface = "bold", ...), rot=0)
+	grid::grid.text(text, x=grid::unit(0.96, "npc"), vjust=0.5,hjust=1, gp = grid::gpar(fontface = "bold", ...), rot=0)
 }
 
 vplayout = function(x, y, just="centre"){
-	return(viewport(layout.pos.row = x, layout.pos.col = y, just=just))
+	return(grid::viewport(layout.pos.row = x, layout.pos.col = y, just=just))
 }
 
 heatmap_motor = function(matrix, border_color, cellwidth, cellheight, tree_col, tree_row, treeheight_col, treeheight_row, filename, width, height, breaks, rbreaks, color, legend, annotation, annotation_colors, annotation_legend, main, preset_main_width=NA, fontsize, fontsize_row, fontsize_col, fmat, fontsize_number, ...){	
@@ -274,24 +271,24 @@ heatmap_motor = function(matrix, border_color, cellwidth, cellheight, tree_col, 
 	nrow = nrow(matrix)
 	ncol = ncol(matrix)
 
-	pushViewport(viewport(layout = grid.layout(nrow = 5, ncol = 5, widths=widths, heights=heights, just=c("left", "top")), gp = do.call(gpar, gp)))
+	grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 5, ncol = 5, widths=widths, heights=heights, just=c("left", "top")), gp = do.call(grid::gpar, gp)))
 	
 	# Get cell dimensions
-	pushViewport(vplayout(5, 2))
-	cellwidth = convertWidth(unit(0:1, "npc"), "bigpts", valueOnly = T)[2] / ncol
-	cellheight = convertHeight(unit(0:1, "npc"), "bigpts", valueOnly = T)[2] / nrow
-	upViewport()
+	grid::pushViewport(vplayout(5, 2))
+	cellwidth = grid::convertWidth(grid::unit(0:1, "npc"), "bigpts", valueOnly = T)[2] / ncol
+	cellheight = grid::convertHeight(grid::unit(0:1, "npc"), "bigpts", valueOnly = T)[2] / nrow
+	grid::upViewport()
 	
 	# Return minimal cell dimension in bigpts to decide if borders are drawn
 	mindim = min(cellwidth, cellheight) 
 	if(!is.na(filename)){
-		pushViewport(vplayout(1:5, 1:5))
+		grid::pushViewport(vplayout(1:5, 1:5))
 		
 		if(is.na(height)){
-			height = convertHeight(unit(0:1, "npc"), "inches", valueOnly = T)[2]
+			height = grid::convertHeight(grid::unit(0:1, "npc"), "inches", valueOnly = T)[2]
 		}
 		if(is.na(width)){
-			width = convertWidth(unit(0:1, "npc"), "inches", valueOnly = T)[2]
+			width = grid::convertWidth(grid::unit(0:1, "npc"), "inches", valueOnly = T)[2]
 		}
 		
 		# Get file type
@@ -313,7 +310,7 @@ heatmap_motor = function(matrix, border_color, cellwidth, cellheight, tree_col, 
 		f(filename, height = height, width = width)
 		heatmap_motor(matrix, cellwidth = cellwidth, cellheight = cellheight, border_color = border_color, tree_col = tree_col, tree_row = tree_row, treeheight_col = treeheight_col, treeheight_row = treeheight_row, breaks = breaks, rbreaks=rbreaks, color = color, legend = legend, annotation = annotation, annotation_colors = annotation_colors, annotation_legend = annotation_legend, filename = NA, main = main, fontsize = fontsize, fontsize_row = fontsize_row, fontsize_col = fontsize_col, fmat = fmat, height=height, width=width, fontsize_number =  fontsize_number, ...)
 		dev.off()
-		upViewport()
+		grid::upViewport()
 		return(c(width, height, lo_obj[[4]]))
 	}
 	
@@ -322,80 +319,80 @@ heatmap_motor = function(matrix, border_color, cellwidth, cellheight, tree_col, 
 	
 	# Draw title
 	if(!is.na(main)){
-		pushViewport(vplayout(5, 1))
+		grid::pushViewport(vplayout(5, 1))
 		draw_main(main, fontsize = fontsize, ...)
-		upViewport()
+		grid::upViewport()
 	}
 	
 	# Draw tree for the columns
 	if(!is.na(tree_col[[1]][1]) & treeheight_col != 0){
-		pushViewport(vplayout(2, 2))
+		grid::pushViewport(vplayout(2, 2))
 		draw_dendrogram(tree_col, horizontal = T)
-		upViewport()
+		grid::upViewport()
 	}
 	
 	# Draw tree for the rows
 	if(!is.na(tree_row[[1]][1]) & treeheight_row != 0){
-		pushViewport(vplayout(5, 1))
+		grid::pushViewport(vplayout(5, 1))
 		draw_dendrogram(tree_row, horizontal = F)
-		upViewport()
+		grid::upViewport()
 	}
 	
 	# Draw matrix
-	pushViewport(vplayout(5, 2))
+	grid::pushViewport(vplayout(5, 2))
 	draw_matrix(matrix, border_color, fmat, fontsize_number)
-	upViewport()
+	grid::upViewport()
 	
 	# Draw colnames
 	if(length(colnames(matrix)) != 0){
-		pushViewport(vplayout(4, 2))
+		grid::pushViewport(vplayout(4, 2))
 		pars = list(colnames(matrix), fontsize = fontsize_col, ...)
 		do.call(draw_colnames, pars)
-		upViewport()
+		grid::upViewport()
 	}
 	
 	# Draw rownames
 	if(length(rownames(matrix)) != 0){
-		pushViewport(vplayout(5, 3))
+		grid::pushViewport(vplayout(5, 3))
 		pars = list(rownames(matrix), fontsize = fontsize_row, ...)
 		do.call(draw_rownames, pars)
-		upViewport()
+		grid::upViewport()
 	}
 	
 	# Draw annotation tracks
 	if(!is.na(annotation[[1]][1])){
-		pushViewport(vplayout(3, 2))
+		grid::pushViewport(vplayout(3, 2))
 		converted_annotation = convert_annotations(annotation, annotation_colors)
 		draw_annotations(converted_annotation, border_color)
-		upViewport()
+		grid::upViewport()
 	}
 	
 	# Draw annotation legend
 	if(!is.na(annotation[[1]][1]) & annotation_legend){
 		if(length(rownames(matrix)) != 0){
-			pushViewport(vplayout(4:5, 5))
+			grid::pushViewport(vplayout(4:5, 5))
 		}
 		else{
-			pushViewport(vplayout(3:5, 5))
+			grid::pushViewport(vplayout(3:5, 5))
 		}
 		draw_annotation_legend(annotation, annotation_colors, border_color, fontsize = fontsize, ...)
-		upViewport()
+		grid::upViewport()
 	}
 	
 	# Draw legend
 	if(!is.na(legend[1])){
 		length(colnames(matrix))
 		if(length(rownames(matrix)) != 0){
-			pushViewport(vplayout(4:5, 4))
+			grid::pushViewport(vplayout(4:5, 4))
 		}
 		else{
-			pushViewport(vplayout(3:5, 4))
+			grid::pushViewport(vplayout(3:5, 4))
 		}
 		draw_legend(color,breaks=rbreaks, legend, fontsize = fontsize, ...)
-		upViewport()
+		grid::upViewport()
 	}
 	
-	upViewport()
+	grid::upViewport()
 }
 
 generate_breaks = function(x, n, center = F){
@@ -597,7 +594,7 @@ kmeans_pheatmap = function(mat, k = min(nrow(mat), 150), sd_limit = NA, ...){
 #' @param width manual option for determining the output file width in
 #' @param height manual option for determining the output file height in inches.
 #' @param \dots graphical parameters for the text used in plot. Parameters passed to 
-#' \code{\link{grid.text}}, see \code{\link{gpar}}. 
+#' \code{\link{grid::grid.text}}, see \code{\link{gpar}}. 
 #' 
 #' @return 
 #' Invisibly a list of components 
@@ -737,7 +734,7 @@ pheatmap = function(mat, color = colorRampPalette(rev(c("#D73027", "#FC8D59", "#
   }
 
   if (legend & is.na(legend_breaks[1])) {
-      legend = grid.pretty(range(as.vector(breaks)))
+      legend = grid::grid.pretty(range(as.vector(breaks)))
 			names(legend) = legend
   }
 	else if(legend & !is.na(legend_breaks[1])){

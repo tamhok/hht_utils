@@ -4,7 +4,9 @@ Version: 0.1
 Authors@R: c(person("Hok Hei", "Developer", role = c("aut", "cre"),
     email = "tamhok@mit.edu"))
 Description: Contains generally useful functions
-Depends:
+Depends: 
     R (>= 3.1.1)
 License: MIT
-LazyData: true
+LazyData: false
+Imports: grid,
+    gplots
